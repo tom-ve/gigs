@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Gigs</string>
+
+    <string name="error_message">Location not found, please try an other location.</string>
+    <string name="location_input_hint">Search location</string>
+    <string name="action_search">Search</string>
+    <string name="button_add_to_calendar">ADD TO CALENDAR</string>
+</resources>
