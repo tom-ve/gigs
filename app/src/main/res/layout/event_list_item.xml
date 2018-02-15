@@ -32,12 +32,16 @@
                 style="@style/TextAppearance.AppCompat.Large"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Eefje de visser"
+                android:textSize="16sp"
             />
             <TextView
                 android:id="@+id/tv_display_name"
                 style="@style/TextAppearance.AppCompat.Large"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="Heel veel tekst zoals een show een hele lange tekst zou hebben "
             />
         </LinearLayout>
 

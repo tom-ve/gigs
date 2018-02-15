@@ -38,7 +38,7 @@ public final class NetworkUtils {
                 "&" + QUERY + "=" + location;
     }
 
-    public static String getMetroAreaCalendarUrlString(String metroAreaId) {
+    public static String getMetroAreaCalendarUrlString(int metroAreaId) {
         return EVENTS_BASE_URL + METRO_AREAS + metroAreaId + CALENDAR_JSON +
                 "?" + API_KEY + "=" + API_KEY_VALUE;
     }

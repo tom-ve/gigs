@@ -1,23 +1,26 @@
 package com.example.android.cookies.Entities;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class Event {
     private String artist;
     private String performance;
     private EventType type;
-    private String id;
-    private Date startTime;
+    private long id;
+    private Calendar startTime;
     private String venueName;
     private String venueStreet;
     private String venueCity;
 
     public Event() { }
 
-    public Event(String artist, String performance, EventType eventType) {
+    public Event(long id, String artist, String performance, EventType eventType, String venueName, String venueCity) {
         this.artist = artist;
         this.performance = performance;
         type = eventType;
+        this.venueName = venueName;
+        this.venueCity = venueCity;
     }
 
     public String getArtist() {
@@ -44,19 +47,19 @@ public class Event {
         this.type = type;
     }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public Date getStartTime() {
+    public Calendar getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(Calendar startTime) {
         this.startTime = startTime;
     }
 

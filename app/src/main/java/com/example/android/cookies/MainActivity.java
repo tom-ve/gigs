@@ -25,6 +25,7 @@ import com.example.android.cookies.Entities.Event;
 import com.example.android.cookies.Entities.EventType;
 import com.example.android.cookies.utils.NetworkUtils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -87,7 +88,10 @@ public class MainActivity extends AppCompatActivity  implements
     @Override
     public void onClick(Event event) {
         Intent intentToStartDetailActivity = new Intent(this, EventDetailActivity.class);
-        intentToStartDetailActivity.putExtra(Intent.EXTRA_TEXT, event.getArtist());
+        intentToStartDetailActivity.putExtra("artist", event.getArtist());
+        intentToStartDetailActivity.putExtra("performance", event.getPerformance());
+        intentToStartDetailActivity.putExtra("venueName", event.getVenueName());
+        intentToStartDetailActivity.putExtra("venueCity", event.getVenueCity());
         startActivity(intentToStartDetailActivity);
     }
 
@@ -106,6 +110,7 @@ public class MainActivity extends AppCompatActivity  implements
             showEventDataView();
             if (!location.isEmpty()) {
                 getMetroAreaId(location);
+                mLocationInput.clearFocus();
             } else {
                 mErrorMessageDisplay.setText(R.string.error_empty_location);
                 showErrorMessage();
@@ -147,12 +152,25 @@ public class MainActivity extends AppCompatActivity  implements
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        //TODO: get metro area id from JSON response
                         try {
-                            JSONObject metroAreaResponse = new JSONObject(response).getJSONObject("resultsPage");
-                            String metroAreaId = metroAreaResponse.getString("status");
-                            Log.i(TAG, "This is the metroAreaID:  " + metroAreaId);
-                            getEventsForMetroArea("59028");
+                            JSONObject resultPage = new JSONObject(response).getJSONObject("resultsPage");
+                            String status = resultPage.getString("status");
+                            Log.i(TAG, "Status getMetroAreaId:  " + status);
+                            if (resultPage.has("results") && !resultPage.isNull("results")) {
+                                JSONObject metroArea = resultPage.getJSONObject("results")
+                                        .getJSONArray("location")
+                                        .getJSONObject(0)
+                                        .getJSONObject("metroArea");
+                                String metroAreaName = metroArea.getString("displayName");
+                                mLocationInput.setText(metroAreaName);
+                                mLocationInput.clearFocus();
+                                Log.i(TAG, "Metro area name:  " + metroAreaName);
+                                int metroAreaId = metroArea.getInt("id");
+                                Log.i(TAG, "Metro area id:  " + metroAreaId);
+                                getEventsForMetroArea(metroAreaId);
+                            } else {
+                                mErrorMessageDisplay.setText(R.string.error_no_metro_area);
+                            }
                         } catch (JSONException e) {
                             mErrorMessageDisplay.setText(R.string.error_no_metro_area);
                             showErrorMessage();
@@ -170,7 +188,7 @@ public class MainActivity extends AppCompatActivity  implements
         mRequestQueue.add(locationsQueryRequest);
     }
 
-    private void getEventsForMetroArea(String metroAreaId) {
+    private void getEventsForMetroArea(int metroAreaId) {
 
         // Request a string response from the provided URL.
         String metroAreaCalendarUrlString = NetworkUtils.getMetroAreaCalendarUrlString(metroAreaId);
@@ -178,20 +196,24 @@ public class MainActivity extends AppCompatActivity  implements
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        //TODO: get events from JSON response
-                        Log.i(TAG, response);
-
+                        Log.i(TAG, "Response getEventsForMetroArea: " + response);
                         List<Event> metroAreaEvents = new ArrayList<>();
-                        metroAreaEvents.add(new Event("Clouseau", "test", EventType.CONCERT));
-                        metroAreaEvents.add(new Event("Eefje de Visser", "test", EventType.CONCERT));
-                        metroAreaEvents.add(new Event("Ed Sheeran", "test", EventType.FESTIVAL));
-                        metroAreaEvents.add(new Event("Justin Timberlake", "test", EventType.FESTIVAL));
-                        metroAreaEvents.add(new Event("U2", "test", EventType.CONCERT));
-                        metroAreaEvents.add(new Event("ACDC", "test", EventType.FESTIVAL));
-                        metroAreaEvents.add(new Event("PINK FLOYD", "test", EventType.CONCERT));
-                        metroAreaEvents.add(new Event("W817", "test", EventType.CONCERT));
-                        metroAreaEvents.add(new Event("Plop", "test", EventType.CONCERT));
-                        metroAreaEvents.add(new Event("Tupac", "test", EventType.CONCERT));
+                        try {
+                            JSONObject resultPage = new JSONObject(response).getJSONObject("resultsPage");
+                            String status = resultPage.getString("status");
+                            Log.i(TAG, "Status getEventsForMetroAreaId:  " + status);
+                            if ("ok".equals(status) && resultPage.has("results") && !resultPage.isNull("results")) {
+                                JSONArray events = resultPage.getJSONObject("results")
+                                        .getJSONArray("event");
+                                metroAreaEvents = getEventsFromJsonArray(events);
+                            } else {
+                                mErrorMessageDisplay.setText(R.string.error_no_events_founds);
+                                showErrorMessage();
+                            }
+                        } catch (JSONException e) {
+                            mErrorMessageDisplay.setText(R.string.error_no_events_founds);
+                            showErrorMessage();
+                        }
 
                         showEventDataView();
                         mEventAdapter.setEventData(metroAreaEvents);
@@ -205,6 +227,44 @@ public class MainActivity extends AppCompatActivity  implements
         });
         // Add the request to the RequestQueue.
         mRequestQueue.add(metroAreaCalendarRequest);
+    }
+
+    private List<Event> getEventsFromJsonArray(JSONArray jsonArray) {
+        List<Event> metroAreaEvents = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            long id = 0;
+            String artist = "Not known";
+            String performance = "Not known";
+            EventType type = EventType.CONCERT;
+            String venueName = "Not known";
+            String venueCity = "Not known";
+            try {
+                JSONObject event = jsonArray.getJSONObject(i);
+                id = event.getLong("id");
+                JSONArray performances = event.getJSONArray("performance");
+                for (int iPerformance = 0; iPerformance < performances.length(); iPerformance++) {
+                    if ("headline".equals(performances.getJSONObject(iPerformance).getString("billing"))) {
+                        artist = performances.getJSONObject(iPerformance).getString("displayName");
+                        break;
+                    }
+                }
+                performance = event.getString("displayName");
+                if ("Concert".equals(event.getString("type"))) {
+                    type = EventType.CONCERT;
+                } else {
+                    type = EventType.FESTIVAL;
+                }
+                JSONObject venue = event.getJSONObject("venue");
+                venueName = venue.getString("displayName");
+                venueCity = venue.getJSONObject("metroArea").getString("displayName");
+                metroAreaEvents.add(new Event(id, artist, performance, type, venueName, venueCity));
+            } catch (JSONException e) {
+                e.printStackTrace();
+                mErrorMessageDisplay.setText(R.string.error_no_events_founds);
+                showErrorMessage();
+            }
+        }
+        return metroAreaEvents;
     }
 
     /**
