@@ -5,7 +5,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.android.cookies.Entities.Event;
+import com.example.android.cookies.Entities.EventType;
+
+import java.util.List;
 
 import static android.view.View.*;
 
@@ -15,7 +21,7 @@ import static android.view.View.*;
  */
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventAdapterViewHolder> {
 
-    private String[] eventData;
+    private List<Event> eventData;
     private final AdapterOnClickHandler clickHandler;
 
     /**
@@ -28,7 +34,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventAdapter
         this.clickHandler = clickHandler;
     }
 
-    public void setEventData(String[] eventData) {
+    public void setEventData(List<Event> eventData) {
         this.eventData = eventData;
         notifyDataSetChanged();
     }
@@ -44,12 +50,19 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventAdapter
 
     @Override
     public void onBindViewHolder(EventAdapterViewHolder holder, int position) {
-        holder.mTextView.setText(eventData[position]);
+        Event event = eventData.get(position);
+        holder.mArtist.setText(event.getArtist());
+        holder.mDisplayname.setText(event.getPerformance());
+        if (EventType.CONCERT == event.getType()) {
+            holder.iconView.setImageResource(R.drawable.ic_concert);
+        } else {
+            holder.iconView.setImageResource(R.drawable.ic_festival);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return eventData != null ? eventData.length : 0;
+        return eventData != null ? eventData.size() : 0;
     }
 
 
@@ -59,11 +72,15 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventAdapter
     public class EventAdapterViewHolder extends RecyclerView.ViewHolder implements
             OnClickListener {
 
-        public final TextView mTextView;
+        public final TextView mArtist;
+        public final ImageView iconView;
+        public final TextView mDisplayname;
 
         public EventAdapterViewHolder(View itemView) {
             super(itemView);
-            mTextView = itemView.findViewById(R.id.tv_artist);
+            mArtist = itemView.findViewById(R.id.tv_artist);
+            mDisplayname = itemView.findViewById(R.id.tv_display_name);
+            iconView = itemView.findViewById(R.id.event_icon);
             itemView.setOnClickListener(this);
         }
 
@@ -75,7 +92,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventAdapter
         @Override
         public void onClick(View view) {
             int adapterPosition = getAdapterPosition();
-            String event = eventData[adapterPosition];
+            Event event = eventData.get(adapterPosition);
             clickHandler.onClick(event);
         }
     }
@@ -84,6 +101,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventAdapter
      * The interface that receives onClick messages.
      */
     public interface AdapterOnClickHandler {
-        void onClick(String event);
+        void onClick(Event event);
     }
 }
