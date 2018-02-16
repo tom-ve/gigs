@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.cookies.Entities.Event;
+import com.example.android.cookies.utils.NotificationUtils;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -158,12 +159,12 @@ public class EventDetailActivity extends AppCompatActivity {
         getContentResolver().insert(builder.build(), values);
     }
 
-    private void createCalendarEvent() {
+    private long createCalendarEvent() {
         long calendarId = getCalendarId();
         if (calendarId == -1) {
             // no calendar account; react meaningfully
             Log.w(TAG, "No calendar account");
-            return;
+            return -1;
         }
 
         ContentValues values = new ContentValues();
@@ -178,7 +179,7 @@ public class EventDetailActivity extends AppCompatActivity {
         values.put(Events.DESCRIPTION, event.getArtist() + ": " + event.getPerformance());
 
         @SuppressLint("MissingPermission") Uri uri = getContentResolver().insert(Events.CONTENT_URI, values);
-        long eventId = new Long(uri.getLastPathSegment());
+        return Long.valueOf(uri != null ? uri.getLastPathSegment() : "-1");
     }
 
     @Override
@@ -238,23 +239,26 @@ public class EventDetailActivity extends AppCompatActivity {
         Toast.makeText(EventDetailActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 
-    public class AddToCalendarTask extends AsyncTask<Void, Void, String> {
+    public class AddToCalendarTask extends AsyncTask<Void, Void, Long> {
 
         @Override
-        protected String doInBackground(Void... voids) {
+        protected Long doInBackground(Void... voids) {
             long calendarId = getCalendarId();
             if (calendarId > -1) {
-                createCalendarEvent();
-                return "Event added!";
+                return createCalendarEvent();
             } else {
-                return "Something went wrong";
+                return (long) -1;
             }
         }
 
         @Override
-        protected void onPostExecute(String message) {
-            toastMessage(message);
-            super.onPostExecute(message);
+        protected void onPostExecute(Long calendarEventId) {
+            if (calendarEventId > -1) {
+                NotificationUtils.eventAddedToCalendarNotification(EventDetailActivity.this, event, calendarEventId);
+            } else {
+                toastMessage("Something went wrong");
+            }
+            super.onPostExecute(calendarEventId);
         }
 
     }

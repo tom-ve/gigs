@@ -202,7 +202,8 @@ public class MainActivity extends AppCompatActivity  implements
                             JSONObject resultPage = new JSONObject(response).getJSONObject("resultsPage");
                             String status = resultPage.getString("status");
                             Log.i(TAG, "Status getEventsForMetroAreaId:  " + status);
-                            if ("ok".equals(status) && resultPage.has("results") && !resultPage.isNull("results")) {
+                            if ("ok".equals(status) && resultPage.has("results") &&
+                                    !resultPage.isNull("results") && resultPage.getJSONObject("results").length() > 0) {
                                 JSONArray events = resultPage.getJSONObject("results")
                                         .getJSONArray("event");
                                 metroAreaEvents = getEventsFromJsonArray(events);

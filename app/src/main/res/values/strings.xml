@@ -21,5 +21,8 @@
     <string name="pref_name_key">name</string>
     <string name="pref_name_label">Name</string>
     <string name="pref_name_default">Gig Lover</string>
+    <string name="action_cancel_title">Cancel</string>
+    <string name="main_notification_channel_name">primary</string>
+    <string name="event_notification_title">Event added to calendar</string>
 
 </resources>

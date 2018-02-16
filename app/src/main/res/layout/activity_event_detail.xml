@@ -21,7 +21,7 @@
         android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:textAlignment="center"
-        android:textSize="32sp"
+        android:textSize="20sp"
         android:layout_margin="16dp"
     />
 
