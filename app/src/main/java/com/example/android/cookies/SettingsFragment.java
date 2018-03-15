@@ -6,6 +6,7 @@ import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.EditTextPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
+import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
 
@@ -18,13 +19,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
         PreferenceScreen preferenceScreen = getPreferenceScreen();
         SharedPreferences sharedPreferences = preferenceScreen.getSharedPreferences();
-        int count = preferenceScreen.getPreferenceCount();
+        int preferenceCatergoryCount = preferenceScreen.getPreferenceCount();
 
-        for (int i = 0; i < count; i++) {
-            Preference preference = preferenceScreen.getPreference(i);
-            if (!(preference instanceof CheckBoxPreference)) {
-                String summary = sharedPreferences.getString(preference.getKey(), "");
-                setPreferenceSummary(preference, summary);
+        for (int i = 0; i < preferenceCatergoryCount; i++) {
+            PreferenceCategory preferenceCategory = (PreferenceCategory) preferenceScreen.getPreference(i);
+            int preferenceCount = preferenceCategory.getPreferenceCount();
+            for (int j = 0; i < preferenceCount; i++) {
+                Preference preference = preferenceCategory.getPreference(j);
+                if (!(preference instanceof CheckBoxPreference)) {
+                    String summary = sharedPreferences.getString(preference.getKey(), "");
+                    setPreferenceSummary(preference, summary);
+                }
             }
         }
     }
