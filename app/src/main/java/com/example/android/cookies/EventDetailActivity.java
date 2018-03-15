@@ -46,7 +46,6 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView performanceDisplayNameTextView;
     private TextView dateTimeTextView;
     private TextView venueDisplayNameTextView;
-    private TextView venueStreetTextView;
     private TextView venueCityTextView;
     private Button addToCalendarButton;
 
@@ -67,7 +66,6 @@ public class EventDetailActivity extends AppCompatActivity {
         performanceDisplayNameTextView = findViewById(R.id.tv_performance_display_name);
         dateTimeTextView = findViewById(R.id.tv_datetime);
         venueDisplayNameTextView = findViewById(R.id.tv_venue_display_name);
-        venueStreetTextView = findViewById(R.id.tv_venue_street);
         venueCityTextView = findViewById(R.id.tv_venue_city_display_name);
 
         addToCalendarButton = findViewById(R.id.button_add_to_calendar);
@@ -80,7 +78,6 @@ public class EventDetailActivity extends AppCompatActivity {
         performanceDisplayNameTextView.setText(event.getPerformance());
         dateTimeTextView.setText(event.getStartTime().getTime().toString());
         venueDisplayNameTextView.setText(event.getVenueName());
-        venueStreetTextView.setText(event.getVenueStreet());
         venueCityTextView.setText(event.getVenueCity());
     }
 
@@ -221,7 +218,6 @@ public class EventDetailActivity extends AppCompatActivity {
         event.setArtist(intent.getStringExtra("artist"));
         event.setPerformance(intent.getStringExtra("performance"));
         event.setVenueName(intent.getStringExtra("venueName"));
-        event.setVenueStreet("Scheijnpoortweg 119");
         event.setVenueCity(intent.getStringExtra("venueCity"));
 
         Calendar date = Calendar.getInstance();

@@ -19,26 +19,17 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Build;
-import android.provider.CalendarContract;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
 import com.example.android.cookies.Entities.Event;
 import com.example.android.cookies.EventDetailActivity;
-import com.example.android.cookies.MainActivity;
 import com.example.android.cookies.R;
 import com.example.android.cookies.sync.EventIntentService;
 import com.example.android.cookies.sync.NotificationTasks;
-
-import java.util.Calendar;
 
 /**
  * Utility class for creating hydration notifications

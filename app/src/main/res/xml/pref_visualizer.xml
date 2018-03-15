@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/pref_cat_profile_label"
+        android:key="@string/pre_cat_profile_key">
+        <EditTextPreference
+            android:id="@+id/pref_name"
+            android:defaultValue="@string/pref_name_default"
+            android:key="@string/pref_name_key"
+            android:title="@string/pref_name_label"
+            android:inputType="text"
+        />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/pref_cat_config_label"
+        android:key="@string/pre_cat_config_key">
 
-    <EditTextPreference
-        android:id="@+id/pref_name"
-        android:defaultValue="@string/pref_name_default"
-        android:key="@string/pref_name_key"
-        android:title="@string/pref_name_label"
-        android:inputType="text"
-    />
-
+        <CheckBoxPreference
+            android:id="@+id/pref_filter"
+            android:defaultValue="@bool/pref_filter_default"
+            android:key="@string/pref_filter_key"
+            android:title="@string/pref_filter_label"
+            android:summaryOn="@string/pref_filter_summary_on"
+            android:summaryOff="@string/pref_filter_summary_off"
+        />
+    </PreferenceCategory>
 </PreferenceScreen>

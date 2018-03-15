@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity  implements
     private ProgressBar mLoadingIndicator;
     private EditText mLocationInput;
 
+    private boolean mFilterOnConcerts;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,15 +108,7 @@ public class MainActivity extends AppCompatActivity  implements
     public boolean onOptionsItemSelected(MenuItem item) {
         int selectedId = item.getItemId();
         if (selectedId == R.id.action_search) {
-            String location = mLocationInput.getText().toString();
-            showEventDataView();
-            if (!location.isEmpty()) {
-                getMetroAreaId(location);
-                mLocationInput.clearFocus();
-            } else {
-                mErrorMessageDisplay.setText(R.string.error_empty_location);
-                showErrorMessage();
-            }
+            getEvents();
         } else if (selectedId == R.id.action_settings) {
             Intent startSettingsActivity = new Intent(this, SettingsActivity.class);
             startActivity(startSettingsActivity);
@@ -123,17 +117,41 @@ public class MainActivity extends AppCompatActivity  implements
         return super.onOptionsItemSelected(item);
     }
 
+    private void getEvents() {
+        String location = mLocationInput.getText().toString();
+        showLoading();
+        if (!location.isEmpty()) {
+            getMetroAreaId(location);
+            mLocationInput.clearFocus();
+        } else {
+            mErrorMessageDisplay.setText(R.string.error_empty_location);
+            showErrorMessage();
+        }
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_name_key))) {
             setWelcomeText(sharedPreferences);
+        } else if (key.equals(getString(R.string.pref_filter_key))) {
+            setFilterOnConcerts(sharedPreferences);
+            getEvents();
         }
     }
 
     private void setupSharedPreferences() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         setWelcomeText(sharedPreferences);
+        setFilterOnConcerts(sharedPreferences);
+
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    private void setFilterOnConcerts(SharedPreferences sharedPreferences) {
+        mFilterOnConcerts = sharedPreferences.getBoolean(
+                getString(R.string.pref_filter_key),
+                getResources().getBoolean(R.bool.pref_filter_default
+                ));
     }
 
     private void setWelcomeText(SharedPreferences sharedPreferences) {
@@ -144,8 +162,6 @@ public class MainActivity extends AppCompatActivity  implements
     }
 
     private void getMetroAreaId(String location) {
-        showLoading();
-
         // Request a string response from the provided URL.
         String locationsQueryUrlString = NetworkUtils.getLocationsQueryUrlString(location);
         StringRequest locationsQueryRequest = new StringRequest(Request.Method.GET, locationsQueryUrlString,
@@ -258,7 +274,9 @@ public class MainActivity extends AppCompatActivity  implements
                 JSONObject venue = event.getJSONObject("venue");
                 venueName = venue.getString("displayName");
                 venueCity = venue.getJSONObject("metroArea").getString("displayName");
-                metroAreaEvents.add(new Event(id, artist, performance, type, venueName, venueCity));
+                if (!mFilterOnConcerts || type == EventType.CONCERT) {
+                    metroAreaEvents.add(new Event(id, artist, performance, type, venueName, venueCity));
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
                 mErrorMessageDisplay.setText(R.string.error_no_events_founds);
