@@ -29,7 +29,7 @@ import com.example.android.cookies.Entities.Event;
 import com.example.android.cookies.EventDetailActivity;
 import com.example.android.cookies.R;
 import com.example.android.cookies.sync.EventIntentService;
-import com.example.android.cookies.sync.NotificationTasks;
+import com.example.android.cookies.sync.EventTasks;
 
 /**
  * Utility class for creating hydration notifications
@@ -94,14 +94,14 @@ public class NotificationUtils {
 
     private static NotificationCompat.Action ignoreReminderAction(Context context) {
         Intent intent = new Intent(context, EventIntentService.class);
-        intent.setAction(NotificationTasks.ACTION_DISMISS_NOTIFICATION);
+        intent.setAction(EventTasks.ACTION_DISMISS_NOTIFICATION);
         PendingIntent pendingIntent = PendingIntent.getService(context, ACTION_IGNORE_PENDING_INTENT_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return new NotificationCompat.Action(android.R.drawable.ic_notification_clear_all, context.getString(R.string.action_cancel_title), pendingIntent);
     }
 
     private static NotificationCompat.Action goToEventInCalendarAction(Context context, long calendarEventId) {
         Intent intent = new Intent(context, EventIntentService.class);
-        intent.setAction(NotificationTasks.ACTION_GO_TO_EVENT_IN_CALENDAR);
+        intent.setAction(EventTasks.ACTION_GO_TO_EVENT_IN_CALENDAR);
         intent.putExtra("calendarEventId", calendarEventId);
 //        Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
 //        builder.appendPath("time");

@@ -1,12 +1,13 @@
 package com.example.android.cookies.Entities;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Event {
+public class Event implements Serializable {
     private String artist;
     private String performance;
-    private EventType type;
+    private String type;
     private long id;
     private Calendar startTime;
     private String venueName;
@@ -15,7 +16,7 @@ public class Event {
 
     public Event() { }
 
-    public Event(long id, String artist, String performance, EventType eventType, String venueName, String venueCity) {
+    public Event(long id, String artist, String performance, String eventType, String venueName, String venueCity) {
         this.artist = artist;
         this.performance = performance;
         type = eventType;
@@ -39,11 +40,11 @@ public class Event {
         this.performance = performance;
     }
 
-    public EventType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(EventType type) {
+    public void setType(String type) {
         this.type = type;
     }
 

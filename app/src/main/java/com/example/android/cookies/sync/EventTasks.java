@@ -23,7 +23,7 @@ import android.provider.CalendarContract;
 
 import com.example.android.cookies.utils.NotificationUtils;
 
-public class NotificationTasks {
+public class EventTasks {
 
     public static final String ACTION_GO_TO_EVENT_IN_CALENDAR = "go-to-event-in-calendar";
     public static final String ACTION_DISMISS_NOTIFICATION = "dismiss-notification";

@@ -35,6 +35,6 @@ public class EventIntentService extends IntentService {
         if (intent.hasExtra("calendarEventId")) {
             calendarEventId = intent.getLongExtra("calendarEventId", 0);
         }
-        NotificationTasks.executeTask(this, action, calendarEventId);
+        EventTasks.executeTask(this, action, calendarEventId);
     }
 }

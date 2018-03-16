@@ -53,7 +53,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventAdapter
         Event event = eventData.get(position);
         holder.mArtist.setText(event.getArtist());
         holder.mDisplayname.setText(event.getPerformance());
-        if (EventType.CONCERT == event.getType()) {
+        if (EventType.CONCERT.equals(event.getType())) {
             holder.iconView.setImageResource(R.drawable.ic_concert);
         } else {
             holder.iconView.setImageResource(R.drawable.ic_festival);

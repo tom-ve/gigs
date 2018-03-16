@@ -1,7 +1,10 @@
 package com.example.android.cookies;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -23,6 +26,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.android.cookies.Entities.Event;
 import com.example.android.cookies.Entities.EventType;
+import com.example.android.cookies.data.EventDbHelper;
 import com.example.android.cookies.utils.NetworkUtils;
 
 import org.json.JSONArray;
@@ -31,6 +35,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.android.cookies.data.EventContract.EventEntry;
 
 public class MainActivity extends AppCompatActivity  implements
         EventAdapter.AdapterOnClickHandler, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -47,6 +53,9 @@ public class MainActivity extends AppCompatActivity  implements
     private EditText mLocationInput;
 
     private boolean mFilterOnConcerts;
+
+    private SQLiteDatabase mDb;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +84,25 @@ public class MainActivity extends AppCompatActivity  implements
         setupSharedPreferences();
     }
 
+    private List<Event> getDataFromDb() {
+        ArrayList<Event> events = new ArrayList<>();
+        Cursor cursor = mDb.query(EventEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        while (cursor.moveToNext()) {
+            Event event = new Event();
+            event.setArtist(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_ARTIST)));
+            event.setPerformance(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_PERFORMANCE)));
+            event.setType(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_TYPE)));
+            events.add(event);
+        }
+        return events;
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -82,11 +110,18 @@ public class MainActivity extends AppCompatActivity  implements
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
 
-    /**
-     * This method is for responding to clicks from our list.
-     *
-     * @param event String describing a particular event.
-     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //Fetch data from DB when device rotates
+        EventDbHelper eventDbHelper = new EventDbHelper(this);
+        mDb = eventDbHelper.getWritableDatabase();
+        if (!mLocationInput.getText().toString().isEmpty()) {
+            showEventDataView();
+            mEventAdapter.setEventData(getDataFromDb());
+        }
+    }
+
     @Override
     public void onClick(Event event) {
         Intent intentToStartDetailActivity = new Intent(this, EventDetailActivity.class);
@@ -213,7 +248,7 @@ public class MainActivity extends AppCompatActivity  implements
                     @Override
                     public void onResponse(String response) {
                         Log.i(TAG, "Response getEventsForMetroArea: " + response);
-                        List<Event> metroAreaEvents = new ArrayList<>();
+                        ArrayList<Event> metroAreaEvents = new ArrayList<>();
                         try {
                             JSONObject resultPage = new JSONObject(response).getJSONObject("resultsPage");
                             String status = resultPage.getString("status");
@@ -234,6 +269,7 @@ public class MainActivity extends AppCompatActivity  implements
 
                         showEventDataView();
                         mEventAdapter.setEventData(metroAreaEvents);
+                        saveDataToDb(metroAreaEvents);
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -246,13 +282,25 @@ public class MainActivity extends AppCompatActivity  implements
         mRequestQueue.add(metroAreaCalendarRequest);
     }
 
-    private List<Event> getEventsFromJsonArray(JSONArray jsonArray) {
-        List<Event> metroAreaEvents = new ArrayList<>();
+    private void saveDataToDb(ArrayList<Event> metroAreaEvents) {
+        mDb.execSQL("DELETE FROM " + EventEntry.TABLE_NAME);
+
+        for (Event event : metroAreaEvents) {
+            ContentValues cv = new ContentValues();
+            cv.put(EventEntry.COLUMN_ARTIST, event.getArtist());
+            cv.put(EventEntry.COLUMN_PERFORMANCE, event.getPerformance());
+            cv.put(EventEntry.COLUMN_TYPE, event.getType());
+            mDb.insert(EventEntry.TABLE_NAME, null, cv);
+        }
+    }
+
+    private ArrayList<Event> getEventsFromJsonArray(JSONArray jsonArray) {
+        ArrayList<Event> metroAreaEvents = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
             long id = 0;
             String artist = "Not known";
             String performance = "Not known";
-            EventType type = EventType.CONCERT;
+            String type = EventType.CONCERT;
             String venueName = "Not known";
             String venueCity = "Not known";
             try {
@@ -266,7 +314,7 @@ public class MainActivity extends AppCompatActivity  implements
                     }
                 }
                 performance = event.getString("displayName");
-                if ("Concert".equals(event.getString("type"))) {
+                if (EventType.CONCERT.equals(event.getString("type"))) {
                     type = EventType.CONCERT;
                 } else {
                     type = EventType.FESTIVAL;
@@ -274,7 +322,7 @@ public class MainActivity extends AppCompatActivity  implements
                 JSONObject venue = event.getJSONObject("venue");
                 venueName = venue.getString("displayName");
                 venueCity = venue.getJSONObject("metroArea").getString("displayName");
-                if (!mFilterOnConcerts || type == EventType.CONCERT) {
+                if (!mFilterOnConcerts || EventType.CONCERT.equals(type)) {
                     metroAreaEvents.add(new Event(id, artist, performance, type, venueName, venueCity));
                 }
             } catch (JSONException e) {
@@ -286,39 +334,18 @@ public class MainActivity extends AppCompatActivity  implements
         return metroAreaEvents;
     }
 
-    /**
-     * This method will make the View for the event data visible and
-     * hide the error message.
-     * <p>
-     * Since it is okay to redundantly set the visibility of a View, we don't
-     * need to check whether each view is currently visible or invisible.
-     */
     private void showEventDataView() {
         mLoadingIndicator.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * This method will make the error message visible and hide the event
-     * View.
-     * <p>
-     * Since it is okay to redundantly set the visibility of a View, we don't
-     * need to check whether each view is currently visible or invisible.
-     */
     private void showErrorMessage() {
         mLoadingIndicator.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * This method will make the loading indicator visible and hide the event View and error
-     * message.
-     * <p>
-     * Since it is okay to redundantly set the visibility of a View, we don't need to check whether
-     * each view is currently visible or invisible.
-     */
     private void showLoading() {
         mRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
