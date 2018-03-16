@@ -103,18 +103,13 @@ public class NotificationUtils {
         Intent intent = new Intent(context, EventIntentService.class);
         intent.setAction(EventTasks.ACTION_GO_TO_EVENT_IN_CALENDAR);
         intent.putExtra("calendarEventId", calendarEventId);
-//        Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
-//        builder.appendPath("time");
-//        ContentUris.appendId(builder, Calendar.getInstance().getTimeInMillis());
-//        Intent intent = new Intent(Intent.ACTION_VIEW).setData(builder.build());
-//        Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, calendarEventId);
-//        Intent intent = new Intent(Intent.ACTION_VIEW).setData(uri);
         PendingIntent pendingIntent = PendingIntent.getService(context, ACTION_CALENDAR_PENDING_INTENT_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        return new NotificationCompat.Action(android.R.drawable.ic_menu_my_calendar, "See calendar", pendingIntent);
+        return new NotificationCompat.Action(android.R.drawable.ic_menu_my_calendar, context.getString(R.string.notification_action_calendar_title), pendingIntent);
     }
 
     private static PendingIntent contentIntent(Context context, Event event) {
         Intent startActivityIntent = new Intent(context, EventDetailActivity.class);
+        startActivityIntent.putExtra("id", event.getId());
         startActivityIntent.putExtra("artist", event.getArtist());
         startActivityIntent.putExtra("performance", event.getPerformance());
         startActivityIntent.putExtra("venueName", event.getVenueName());

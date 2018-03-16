@@ -153,8 +153,7 @@ public class EventDetailActivity extends AppCompatActivity {
         getContentResolver().insert(builder.build(), values);
     }
 
-    private long createCalendarEvent() {
-        long calendarId = getCalendarId();
+    private long createCalendarEvent(long calendarId) {
         if (calendarId == -1) {
             // no calendar account; react meaningfully
             Log.w(TAG, "No calendar account");
@@ -183,7 +182,7 @@ public class EventDetailActivity extends AppCompatActivity {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    toastMessage("Try again");
+                    new AddToCalendarTask().execute();
                 }
             }
         }
@@ -239,7 +238,7 @@ public class EventDetailActivity extends AppCompatActivity {
         protected Long doInBackground(Void... voids) {
             long calendarId = getCalendarId();
             if (calendarId > -1) {
-                return createCalendarEvent();
+                return createCalendarEvent(calendarId);
             } else {
                 return (long) -1;
             }
