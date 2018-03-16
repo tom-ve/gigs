@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -99,27 +100,6 @@ public class MainActivity extends AppCompatActivity  implements
         }
     }
 
-    private List<Event> getDataFromDb() {
-        ArrayList<Event> events = new ArrayList<>();
-        Cursor cursor = mDb.query(EventEntry.TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-        while (cursor.moveToNext()) {
-            Event event = new Event();
-            event.setArtist(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_ARTIST)));
-            event.setPerformance(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_PERFORMANCE)));
-            event.setType(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_TYPE)));
-            event.setVenueName(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_VENUE_NAME)));
-            event.setVenueCity(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_VENUE_CITY)));
-            events.add(event);
-        }
-        return events;
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -137,6 +117,32 @@ public class MainActivity extends AppCompatActivity  implements
             showEventDataView();
             mEventAdapter.setEventData(getDataFromDb());
         }
+    }
+
+    private List<Event> getDataFromDb() {
+        ArrayList<Event> events = new ArrayList<>();
+        Cursor cursor = mDb.query(EventEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        if (cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                Event event = new Event();
+                event.setArtist(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_ARTIST)));
+                event.setPerformance(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_PERFORMANCE)));
+                event.setType(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_TYPE)));
+                event.setVenueName(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_VENUE_NAME)));
+                event.setVenueCity(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_VENUE_CITY)));
+                events.add(event);
+            }
+        } else  {
+            mErrorMessageDisplay.setText(R.string.error_no_events_founds);
+            showErrorMessage();
+        }
+        return events;
     }
 
     @Override
@@ -161,6 +167,7 @@ public class MainActivity extends AppCompatActivity  implements
         int selectedId = item.getItemId();
         if (selectedId == R.id.action_search) {
             getEvents();
+            mLocationInput.clearFocus();
         } else if (selectedId == R.id.action_settings) {
             Intent startSettingsActivity = new Intent(this, SettingsActivity.class);
             startActivity(startSettingsActivity);
@@ -234,13 +241,14 @@ public class MainActivity extends AppCompatActivity  implements
                                         .getJSONObject("metroArea");
                                 String metroAreaName = metroArea.getString("displayName");
                                 mLocationInput.setText(metroAreaName);
-                                mLocationInput.clearFocus();
                                 int metroAreaId = metroArea.getInt("id");
                                 getEventsForMetroArea(metroAreaId);
                             } else {
                                 mErrorMessageDisplay.setText(R.string.error_no_metro_area);
                             }
                         } catch (JSONException e) {
+                            Log.w(TAG, e.getMessage());
+                            e.printStackTrace();
                             mErrorMessageDisplay.setText(R.string.error_no_metro_area);
                             showErrorMessage();
                         }
@@ -248,6 +256,8 @@ public class MainActivity extends AppCompatActivity  implements
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        Log.w(TAG, error.getMessage());
+                        error.printStackTrace();
                         mErrorMessageDisplay.setText(R.string.error_no_metro_area);
                         showErrorMessage();
                     }
@@ -274,22 +284,25 @@ public class MainActivity extends AppCompatActivity  implements
                                 JSONArray events = resultPage.getJSONObject("results")
                                         .getJSONArray("event");
                                 metroAreaEvents = getEventsFromJsonArray(events);
+                                showEventDataView();
                             } else {
                                 mErrorMessageDisplay.setText(R.string.error_no_events_founds);
                                 showErrorMessage();
                             }
                         } catch (JSONException e) {
+                            Log.w(TAG, e.getMessage());
+                            e.printStackTrace();
                             mErrorMessageDisplay.setText(R.string.error_no_events_founds);
                             showErrorMessage();
                         }
-
-                        showEventDataView();
                         mEventAdapter.setEventData(metroAreaEvents);
                         saveDataToDb(metroAreaEvents);
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        Log.w(TAG, error.getMessage());
+                        error.printStackTrace();
                         mErrorMessageDisplay.setText(R.string.error_no_events_founds);
                         showErrorMessage();
                     }
@@ -308,7 +321,10 @@ public class MainActivity extends AppCompatActivity  implements
             cv.put(EventEntry.COLUMN_TYPE, event.getType());
             cv.put(EventEntry.COLUMN_VENUE_NAME, event.getVenueName());
             cv.put(EventEntry.COLUMN_VENUE_CITY, event.getVenueCity());
-            mDb.insert(EventEntry.TABLE_NAME, null, cv);
+            long id = mDb.insert(EventEntry.TABLE_NAME, null, cv);
+            if (id == -1) {
+                Log.w(TAG, "Failed to save event to database (MainActivity.java:320");
+            }
         }
     }
 
@@ -344,6 +360,7 @@ public class MainActivity extends AppCompatActivity  implements
                     metroAreaEvents.add(new Event(id, artist, performance, type, venueName, venueCity));
                 }
             } catch (JSONException e) {
+                Log.w(TAG, e.getMessage());
                 e.printStackTrace();
                 mErrorMessageDisplay.setText(R.string.error_no_events_founds);
                 showErrorMessage();
