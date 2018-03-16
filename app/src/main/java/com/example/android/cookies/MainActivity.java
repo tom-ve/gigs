@@ -3,6 +3,8 @@ package com.example.android.cookies;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -10,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +36,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.example.android.cookies.data.EventContract.EventEntry;
 
@@ -62,7 +64,6 @@ public class MainActivity extends AppCompatActivity  implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         //Setting up the recyclerView
         mRecyclerView = findViewById(R.id.recyclerview_event);
         mEventAdapter = new EventAdapter(this);
@@ -84,6 +85,20 @@ public class MainActivity extends AppCompatActivity  implements
         setupSharedPreferences();
     }
 
+    private void setLanguage(SharedPreferences sharedPreferences) {
+        String language = sharedPreferences.getString(
+                getString(R.string.pref_lang_key),
+                getString(R.string.pref_lang_default));
+        Locale myLocale = new Locale(language);
+        Resources res = getBaseContext().getResources();
+        Configuration conf = res.getConfiguration();
+        if (!conf.locale.getLanguage().equals(myLocale.getLanguage())) {
+            conf.setLocale(myLocale);
+            res.updateConfiguration(conf, res.getDisplayMetrics());
+            recreate();
+        }
+    }
+
     private List<Event> getDataFromDb() {
         ArrayList<Event> events = new ArrayList<>();
         Cursor cursor = mDb.query(EventEntry.TABLE_NAME,
@@ -98,6 +113,8 @@ public class MainActivity extends AppCompatActivity  implements
             event.setArtist(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_ARTIST)));
             event.setPerformance(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_PERFORMANCE)));
             event.setType(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_TYPE)));
+            event.setVenueName(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_VENUE_NAME)));
+            event.setVenueCity(cursor.getString(cursor.getColumnIndex(EventEntry.COLUMN_VENUE_CITY)));
             events.add(event);
         }
         return events;
@@ -171,6 +188,9 @@ public class MainActivity extends AppCompatActivity  implements
         } else if (key.equals(getString(R.string.pref_filter_key))) {
             setFilterOnConcerts(sharedPreferences);
             getEvents();
+        } else if (key.equals(getString(R.string.pref_lang_key))) {
+            setLanguage(sharedPreferences);
+            recreate();
         }
     }
 
@@ -178,6 +198,7 @@ public class MainActivity extends AppCompatActivity  implements
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         setWelcomeText(sharedPreferences);
         setFilterOnConcerts(sharedPreferences);
+        setLanguage(sharedPreferences);
 
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
@@ -206,7 +227,6 @@ public class MainActivity extends AppCompatActivity  implements
                         try {
                             JSONObject resultPage = new JSONObject(response).getJSONObject("resultsPage");
                             String status = resultPage.getString("status");
-                            Log.i(TAG, "Status getMetroAreaId:  " + status);
                             if (resultPage.has("results") && !resultPage.isNull("results")) {
                                 JSONObject metroArea = resultPage.getJSONObject("results")
                                         .getJSONArray("location")
@@ -215,9 +235,7 @@ public class MainActivity extends AppCompatActivity  implements
                                 String metroAreaName = metroArea.getString("displayName");
                                 mLocationInput.setText(metroAreaName);
                                 mLocationInput.clearFocus();
-                                Log.i(TAG, "Metro area name:  " + metroAreaName);
                                 int metroAreaId = metroArea.getInt("id");
-                                Log.i(TAG, "Metro area id:  " + metroAreaId);
                                 getEventsForMetroArea(metroAreaId);
                             } else {
                                 mErrorMessageDisplay.setText(R.string.error_no_metro_area);
@@ -247,12 +265,10 @@ public class MainActivity extends AppCompatActivity  implements
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.i(TAG, "Response getEventsForMetroArea: " + response);
                         ArrayList<Event> metroAreaEvents = new ArrayList<>();
                         try {
                             JSONObject resultPage = new JSONObject(response).getJSONObject("resultsPage");
                             String status = resultPage.getString("status");
-                            Log.i(TAG, "Status getEventsForMetroAreaId:  " + status);
                             if ("ok".equals(status) && resultPage.has("results") &&
                                     !resultPage.isNull("results") && resultPage.getJSONObject("results").length() > 0) {
                                 JSONArray events = resultPage.getJSONObject("results")
@@ -290,6 +306,8 @@ public class MainActivity extends AppCompatActivity  implements
             cv.put(EventEntry.COLUMN_ARTIST, event.getArtist());
             cv.put(EventEntry.COLUMN_PERFORMANCE, event.getPerformance());
             cv.put(EventEntry.COLUMN_TYPE, event.getType());
+            cv.put(EventEntry.COLUMN_VENUE_NAME, event.getVenueName());
+            cv.put(EventEntry.COLUMN_VENUE_CITY, event.getVenueCity());
             mDb.insert(EventEntry.TABLE_NAME, null, cv);
         }
     }

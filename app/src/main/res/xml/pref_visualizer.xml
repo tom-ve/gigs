@@ -23,5 +23,13 @@
             android:summaryOn="@string/pref_filter_summary_on"
             android:summaryOff="@string/pref_filter_summary_off"
         />
+
+        <ListPreference
+            android:defaultValue="@string/pref_lang_default"
+            android:key="@string/pref_lang_key"
+            android:title="@string/pref_lang_label"
+            android:entries="@array/pref_lang_labels"
+            android:entryValues="@array/pref_lang_values"
+        />
     </PreferenceCategory>
 </PreferenceScreen>

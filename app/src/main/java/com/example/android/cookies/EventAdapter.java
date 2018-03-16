@@ -13,7 +13,7 @@ import com.example.android.cookies.Entities.EventType;
 
 import java.util.List;
 
-import static android.view.View.*;
+import static android.view.View.OnClickListener;
 
 /**
  * {@link EventAdapter} exposes a list of concerts/events to a

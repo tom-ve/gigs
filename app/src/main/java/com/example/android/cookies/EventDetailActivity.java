@@ -25,12 +25,9 @@ import com.example.android.cookies.Entities.Event;
 import com.example.android.cookies.utils.NotificationUtils;
 
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.TreeMap;
 
-import static android.provider.CalendarContract.*;
+import static android.provider.CalendarContract.Calendars;
+import static android.provider.CalendarContract.Events;
 
 public class EventDetailActivity extends AppCompatActivity {
 

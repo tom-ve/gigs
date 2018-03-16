@@ -19,12 +19,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
         PreferenceScreen preferenceScreen = getPreferenceScreen();
         SharedPreferences sharedPreferences = preferenceScreen.getSharedPreferences();
-        int preferenceCatergoryCount = preferenceScreen.getPreferenceCount();
+        int preferenceCategoryCount = preferenceScreen.getPreferenceCount();
 
-        for (int i = 0; i < preferenceCatergoryCount; i++) {
+        for (int i = 0; i < preferenceCategoryCount; i++) {
             PreferenceCategory preferenceCategory = (PreferenceCategory) preferenceScreen.getPreference(i);
             int preferenceCount = preferenceCategory.getPreferenceCount();
-            for (int j = 0; i < preferenceCount; i++) {
+            for (int j = 0; j < preferenceCount; j++) {
                 Preference preference = preferenceCategory.getPreference(j);
                 if (!(preference instanceof CheckBoxPreference)) {
                     String summary = sharedPreferences.getString(preference.getKey(), "");
@@ -48,17 +48,24 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.pref_name_key))) {
-            String summary = sharedPreferences.getString(getString(R.string.pref_name_key),"");
-            Preference preference = findPreference(getString(R.string.pref_name_key));
-            setPreferenceSummary(preference, summary);
+        Preference preference = findPreference(key);
+        if (null != preference) {
+            if (!(preference instanceof CheckBoxPreference)) {
+                setPreferenceSummary(preference, sharedPreferences.getString(key, ""));
+            }
         }
-
     }
 
     private void setPreferenceSummary(Preference preference, String summary) {
         if (preference instanceof EditTextPreference) {
             preference.setSummary(summary);
+        } else if (preference instanceof ListPreference) {
+            ListPreference lp = (ListPreference) preference;
+            int prefIndex = lp.findIndexOfValue(summary);
+            if (prefIndex >= 0) {
+                lp.setSummary(lp.getEntries()[prefIndex]);
+            }
         }
     }
+
 }

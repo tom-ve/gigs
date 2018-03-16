@@ -18,11 +18,15 @@
 
     <string name="welcome_message">Hi %1$s!</string>
 
-    <string name="pref_name_key">name</string>
+    <string name="pre_cat_profile_key" translatable="false">profile</string>
+    <string name="pref_cat_profile_label">Profile</string>
+    <string name="pref_name_key" translatable="false">name</string>
     <string name="pref_name_label">Name</string>
-    <string name="pref_name_default">Gig Lover</string>
+    <string name="pref_name_default" translatable="false">Gig Lover</string>
 
-    <string name="pref_filter_key">filter</string>
+    <string name="pre_cat_config_key" translatable="false">settings</string>
+    <string name="pref_cat_config_label">Settings</string>
+    <string name="pref_filter_key" translatable="false">filter</string>
     <string name="pref_filter_label">Filter on concerts</string>
     <string name="pref_filter_summary_on">Filtering on</string>
     <string name="pref_filter_summary_off">Filtering off</string>
@@ -30,10 +34,14 @@
 
     <string name="event_notification_title">Event added to calendar</string>
     <string name="action_cancel_title">Cancel</string>
-    <string name="main_notification_channel_name">primary</string>
-    <string name="pref_cat_profile_label">Profile</string>
-    <string name="pre_cat_profile_key">profile</string>
-    <string name="pref_cat_config_label">Settings</string>
-    <string name="pre_cat_config_key">settings</string>
+    <string name="main_notification_channel_name" translatable="false">primary</string>
+    <string name="pref_lang_default" translatable="false">en</string>
+    <string name="pref_lang_key" translatable="false">language</string>
+    <string name="pref_lang_label">Language</string>
 
+    <string name="pref_lang_label_en">English</string>
+    <string name="pref_lang_label_nl">Dutch</string>
+    <string name="pref_lang_value_en" translatable="false">en</string>
+    <string name="pref_lang_value_nl" translatable="false">nl</string>
+    <string name="pref_lang_en">English</string>
 </resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Gigs</string>
+    <string name="detail_activity_label">Details</string>
+    <string name="location_input_hint">Zoek locatie</string>
+    <string name="button_add_to_calendar">ZET IN AGENDA</string>
+    <string name="content_description_list_view_icon">Omschrijving icon</string>
+    <string name="error_message">Locatie niet gevonden, geef een andere locatie.</string>
+    <string name="error_empty_location">Vul een locatie in.</string>
+    <string name="error_no_metro_area">Geen stad gevonden voor deze locatie.</string>
+    <string name="error_no_events_founds">Geen events gevonden voor deze locatie.</string>
+    <string name="action_share">Delen</string>
+    <string name="action_search">Zoeken</string>
+    <string name="action_settings">Instellingen</string>
+    <string name="welcome_message">Hallo %1$s!</string>
+    <string name="pref_cat_profile_label">Profiel</string>
+    <string name="pref_name_label">Naam</string>
+    <string name="pref_cat_config_label">Instellingen</string>
+    <string name="pref_filter_label">Filter op concerten</string>
+    <string name="pref_filter_summary_on">Filtering aan</string>
+    <string name="pref_filter_summary_off">Filtering uit</string>
+    <string name="event_notification_title">Event toegevoegd</string>
+    <string name="action_cancel_title">Annuleren</string>
+    <string name="pref_lang_label">Taal</string>
+    <string name="pref_lang_label_nl">Nederlands</string>
+    <string name="pref_lang_label_en">Engels</string>
+</resources>
