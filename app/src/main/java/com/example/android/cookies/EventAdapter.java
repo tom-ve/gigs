@@ -58,6 +58,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventAdapter
         } else {
             holder.iconView.setImageResource(R.drawable.ic_festival);
         }
+        holder.itemView.setTag(event.getId());
     }
 
     @Override

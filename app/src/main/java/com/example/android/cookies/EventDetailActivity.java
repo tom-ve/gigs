@@ -212,6 +212,7 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private void getEventDetails(Intent intent) {
         event = new Event();
+        event.setId(intent.getLongExtra("id", 0));
         event.setArtist(intent.getStringExtra("artist"));
         event.setPerformance(intent.getStringExtra("performance"));
         event.setVenueName(intent.getStringExtra("venueName"));

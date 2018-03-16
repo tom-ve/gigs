@@ -142,12 +142,14 @@ public class MainActivity extends AppCompatActivity  implements
             mErrorMessageDisplay.setText(R.string.error_no_events_founds);
             showErrorMessage();
         }
+        cursor.close();
         return events;
     }
 
     @Override
     public void onClick(Event event) {
         Intent intentToStartDetailActivity = new Intent(this, EventDetailActivity.class);
+        intentToStartDetailActivity.putExtra("id", event.getId());
         intentToStartDetailActivity.putExtra("artist", event.getArtist());
         intentToStartDetailActivity.putExtra("performance", event.getPerformance());
         intentToStartDetailActivity.putExtra("venueName", event.getVenueName());
